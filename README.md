@@ -15,28 +15,28 @@ This project contains:
 ```
 sgr-agetn-core-tool-search-context-compression/
 │
-├── sgr-agent-core/                     # Main agent framework
-│   ├── sgr_agent_core/                 # Core agent implementation
-│   │   ├── agents/                     # Agent implementations
-│   │   ├── tools/                      # Agent tools
-│   │   │   └── sql_agent/             # SQL agent tools
-│   │   ├── prompts/                    # System prompts
-│   │   └── services/                   # Agent services
-│   │
-│   ├── agent_visualizer/               # Streamlit visualizer
-│   ├── agents.yaml                     # Agent configurations
-│   ├── config.yaml                     # Global config
-│   └── run_agent.py                    # Agent runner
-│
-└── postgres-adminer-setup/             # PostgreSQL + API setup
-    ├── api/                            # FastAPI implementation
-    │   ├── main.py                     # API endpoints
-    │   ├── database.py                 # Database operations
-    │   └── config.py                   # Configuration
+└── sgr-agent-core/                     # Main agent framework
+    ├── sgr_agent_core/                 # Core agent implementation
+    │   ├── agents/                     # Agent implementations
+    │   ├── tools/                      # Agent tools
+    │   │   └── sql_agent/             # SQL agent tools
+    │   ├── prompts/                    # System prompts
+    │   └── services/                   # Agent services
     │
-    ├── docker-compose.yml              # Docker setup
-    ├── init_db.sql                     # Database schema
-    └── requirements.txt                # Python dependencies
+    ├── postgres-adminer-setup/         # PostgreSQL + API setup
+    │   ├── api/                        # FastAPI implementation
+    │   │   ├── main.py                 # API endpoints
+    │   │   ├── database.py             # Database operations
+    │   │   └── config.py               # Configuration
+    │   │
+    │   ├── docker-compose.yml          # Docker setup
+    │   ├── init_db.sql                 # Database schema
+    │   └── requirements.txt            # Python dependencies
+    │
+    ├── agent_visualizer/               # Streamlit visualizer
+    ├── agents.yaml                     # Agent configurations
+    ├── config.yaml                     # Global config
+    └── run_agent.py                    # Agent runner
 ```
 
 ## 🚀 Quick Start
@@ -44,7 +44,7 @@ sgr-agetn-core-tool-search-context-compression/
 ### 1. Start PostgreSQL and API
 
 ```bash
-cd postgres-adminer-setup
+cd sgr-agent-core/postgres-adminer-setup
 docker compose up -d
 ```
 

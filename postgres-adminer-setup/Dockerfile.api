@@ -1,0 +1,36 @@
+# Используем легкий образ Python на основе Alpine для минимального размера
+FROM python:3.12-alpine
+
+# Устанавливаем рабочую директорию для приложения
+WORKDIR /app
+
+# Устанавливаем системные зависимости, необходимые для компиляции Python пакетов
+# gcc, musl-dev, postgresql-dev нужны для asyncpg и других библиотек
+RUN apk add --no-cache \
+    gcc \
+    musl-dev \
+    postgresql-dev \
+    libffi-dev
+
+# Копируем файл зависимостей для установки Python пакетов
+COPY requirements.txt .
+
+# Устанавливаем Python зависимости без кеша, чтобы уменьшить размер образа
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Копируем код приложения в контейнер
+COPY api/ /app/api/
+
+# Создаем непривилегированного пользователя для запуска приложения (безопасность)
+RUN adduser -D -u 1000 apiuser && \
+    chown -R apiuser:apiuser /app
+
+# Переключаемся на непривилегированного пользователя
+USER apiuser
+
+# Открываем порт 18790 для доступа к API
+EXPOSE 18790
+
+# Запускаем uvicorn сервер с приложением FastAPI
+# --reload включает автоматическую перезагрузку при изменении кода
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "18790", "--reload"]

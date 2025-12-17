@@ -1,0 +1,77 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: sgr-postgres-standalone
+    restart: unless-stopped
+
+    ports:
+      - "18788:18788"  # Кастомный порт для PostgreSQL
+
+    environment:
+      - POSTGRES_DB=sgr_memory_vault
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=Lol770905!
+      - PGPORT=18788  # Postgres слушает на порту 18788
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d sgr_memory_vault -p 18788"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:latest
+    container_name: sgr-adminer-standalone
+    restart: unless-stopped
+
+    ports:
+      - "18789:8080"  # Adminer на порту 18789
+    
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres:18788
+    
+    depends_on:
+      - postgres
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: sgr-api-standalone
+    restart: unless-stopped
+
+    ports:
+      - "18790:18790"  # API на порту 18790
+
+    volumes:
+      - ./api:/app/api  # Монтируем код API для hot-reload
+
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=18788
+      - DATABASE_NAME=sgr_memory_vault
+      - DATABASE_USER=admin
+      - DATABASE_PASSWORD=Lol770905!
+      - API_SECRET_KEY=your-super-secret-key-change-in-production-min-32-characters-long
+      - API_ALGORITHM=HS256
+      - API_ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - API_USERNAME=admin
+      - API_PASSWORD=secure_api_password_2024
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:18790/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local

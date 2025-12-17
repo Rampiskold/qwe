@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Environment
+.env
+*.local
+postgres-adminer-setup/api/.env
+
+# Docker
+postgres_data/
+
+# Logs
+*.log
+sgr-agent-core/logs/
+sgr-agent-core/reports/
+
+# Database
+*.db
+*.sqlite
+
+# Temporary files
+*.tmp
+*.bak
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+
+# MCP
+mcps/
+
+# Terminals
+terminals/
+
+# Exported project (не нужно в основном репо)
+sql-agent-export/

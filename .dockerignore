@@ -1,0 +1,92 @@
+# Docker ignore file for sql-agent
+# Исключаем файлы которые не нужны в Docker образе
+
+# Git
+.git
+.gitignore
+.github
+
+# IDE/Editor
+.vscode
+.idea
+.cursor
+*.swp
+*.swo
+
+# Python cache
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info
+.eggs
+*.egg
+
+# Virtual environments
+.venv
+venv
+env
+ENV
+
+# Build artifacts
+build
+dist
+*.whl
+
+# Testing
+.pytest_cache
+.coverage
+htmlcov
+.tox
+.nox
+
+# Documentation (not needed in runtime)
+docs
+*.md
+!README.md
+
+# Logs and reports (will be mounted as volumes)
+logs
+reports
+
+# OS files
+.DS_Store
+Thumbs.db
+*.lnk
+
+# Development files
+tests
+benchmark
+examples
+
+# Frontend (not needed for agent)
+sgr-deep-research-frontend
+agent_visualizer
+
+# Other services (built separately)
+postgres-adminer-setup
+services
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+temp_*
+draft_*
+
+# Docker files (avoid recursive)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Security - never include secrets
+*.env
+.env*
+secrets.yaml
+secrets.json
+*.key
+*.secret
+*.pem
+*.crt

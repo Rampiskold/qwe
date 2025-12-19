@@ -1,0 +1,118 @@
+# SQL Agent - Full Docker Stack
+# Включает: PostgreSQL, API, SQL Agent
+#
+# Запуск всей инфраструктуры:
+#   docker-compose up -d postgres api
+#
+# Запуск агента (после запуска инфраструктуры):
+#   docker-compose run --rm sql-agent sql_database_agent "Ваш запрос"
+#
+# Примеры:
+#   docker-compose run --rm sql-agent sql_database_agent "Покажи все таблицы в базе данных"
+#   docker-compose run --rm sql-agent sql_database_agent "Сколько записей в таблице app_logs?"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: sql-agent-postgres
+    restart: unless-stopped
+    ports:
+      - "18788:18788"
+    environment:
+      - POSTGRES_DB=sgr_memory_vault
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=Lol770905!
+      - PGPORT=18788
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-adminer-setup/init_db.sql:/docker-entrypoint-initdb.d/01_init_db.sql
+      - ./postgres-adminer-setup/sample_data.sql:/docker-entrypoint-initdb.d/02_sample_data.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d sgr_memory_vault -p 18788"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sql-agent-network
+
+  # Adminer - Web UI for database (optional)
+  adminer:
+    image: adminer:latest
+    container_name: sql-agent-adminer
+    restart: unless-stopped
+    ports:
+      - "18789:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres:18788
+    depends_on:
+      - postgres
+    networks:
+      - sql-agent-network
+
+  # Database API Service
+  api:
+    build:
+      context: ./postgres-adminer-setup
+      dockerfile: Dockerfile.api
+    container_name: sql-agent-api
+    restart: unless-stopped
+    ports:
+      - "18790:18790"
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=18788
+      - DATABASE_NAME=sgr_memory_vault
+      - DATABASE_USER=admin
+      - DATABASE_PASSWORD=Lol770905!
+      - API_SECRET_KEY=your-super-secret-key-change-in-production-min-32-characters-long
+      - API_ALGORITHM=HS256
+      - API_ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - API_USERNAME=admin
+      - API_PASSWORD=secure_api_password_2024
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:18790/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sql-agent-network
+
+  # SQL Agent - Main Application
+  sql-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sql-agent-runner
+    environment:
+      # API URL внутри Docker сети
+      - SQL_API_URL=http://api:18790
+      # LLM Configuration (переопределите через .env или --env)
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    volumes:
+      # Монтируем конфиги для возможности изменения без пересборки
+      - ./config.yaml:/app/config.yaml:ro
+      - ./agents.yaml:/app/agents.yaml:ro
+      - ./logging_config.yaml:/app/logging_config.yaml:ro
+      # Сохраняем логи и отчёты на хост
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - sql-agent-network
+    # Не запускаем автоматически - используем docker-compose run
+    profiles:
+      - agent
+
+networks:
+  sql-agent-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

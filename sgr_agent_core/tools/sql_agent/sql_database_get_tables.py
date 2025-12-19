@@ -4,12 +4,16 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from typing import TYPE_CHECKING
 
 import httpx
 from pydantic import Field
 
 from sgr_agent_core.base_tool import BaseTool
+
+# API URL configurable via environment variable (for Docker)
+SQL_API_BASE_URL = os.environ.get("SQL_API_URL", "http://localhost:18790")
 
 if TYPE_CHECKING:
     from sgr_agent_core.agent_definition import AgentConfig
@@ -61,7 +65,7 @@ class SQLDatabaseGetTablesTool(BaseTool):
         Returns:
             JSON string with tables list and pagination info
         """
-        api_url = "http://localhost:18790/api/tables"
+        api_url = f"{SQL_API_BASE_URL}/api/tables"
         
         logger.info(f"📊 Getting tables list: page={self.page}, page_size={self.page_size}")
         logger.debug(f"Reasoning: {self.reasoning}")
@@ -98,7 +102,7 @@ class SQLDatabaseGetTablesTool(BaseTool):
             error_msg = f"Database API connection error: {str(e)}"
             logger.error(error_msg)
             return json.dumps(
-                {"error": error_msg, "hint": "Check that API is running on localhost:18790"},
+                {"error": error_msg, "hint": f"Check that API is running on {SQL_API_BASE_URL}"},
                 ensure_ascii=False,
             )
         except Exception as e:

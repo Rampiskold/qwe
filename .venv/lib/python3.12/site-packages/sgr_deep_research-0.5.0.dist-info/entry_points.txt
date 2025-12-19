@@ -1,0 +1,2 @@
+[console_scripts]
+sgr = sgr_agent_core.__main__:main
